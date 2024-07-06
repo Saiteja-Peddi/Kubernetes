@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: mongodb-deployment #Name should be unique within the Namespace
+spec: #Specification that describes the desired state of the deployment
+  selector:
+    matchLabels:
+      app: mongodb
+  replicas: 1 #Tells deployment to run 1 pod matching the template
+  template: #Template for creating new pods under this deployment
+    metadata:
+      labels: #Labels applied to all pods created from this template. Should match deployment selector.
+        app: mongodb
+    spec: #Specification of the pod, defining the containers that should be run.
+      containers:
+      - name: mongodb #Name of the container which should be unique within the pod.
+        image: mongo
+        ports:
+        - containerPort: 27017 #The MongoDB server in the image listens on the standard MongoDB port, 27017
+        env: 
+        - name: MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-secret
+              key: mongo-root-username
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongodb-secret
+              key: mongo-root-password
+
+#In yaml '---' mean considers content below this as separate document.
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+spec:
+  selector:
+    app: mongodb
+  ports:
+    - protocol: TCP
+      port: 27017
+      targetPort: 27017
