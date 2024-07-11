@@ -1,7 +1,8 @@
 apiVersion: apps/v1
 kind: Deployment
-metadata: 
+metadata:
   name: mongodb-deployment #Name should be unique within the Namespace
+  namespace: mongodb-express
 spec: #Specification that describes the desired state of the deployment
   selector:
     matchLabels:
@@ -13,30 +14,30 @@ spec: #Specification that describes the desired state of the deployment
         app: mongodb
     spec: #Specification of the pod, defining the containers that should be run.
       containers:
-      - name: mongodb #Name of the container which should be unique within the pod.
-        image: mongo
-        ports:
-        - containerPort: 27017 #The MongoDB server in the image listens on the standard MongoDB port, 27017
-        env: 
-        - name: MONGO_INITDB_ROOT_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: mongodb-secret
-              key: mongo-root-username
-        - name: MONGO_INITDB_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: mongodb-secret
-              key: mongo-root-password
+        - name: mongodb #Name of the container which should be unique within the pod.
+          image: mongo
+          ports:
+            - containerPort: 27017 #The MongoDB server in the image listens on the standard MongoDB port, 27017
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: mongo-root-username
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: mongo-root-password
 
 #In yaml '---' mean considers content below this as separate document.
 
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
   name: mongodb-service
+  namespace: mongodb-express
 spec:
   selector:
     app: mongodb
